@@ -32,7 +32,6 @@ const CatDraggable = () => {
 
   return (
     <View style={styles.container}>
-      {/* Background */}
       <View style={styles.background} />
 
       <View
@@ -79,7 +78,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#f0f0f0', // Cool background color
+    backgroundColor: '#f0f0f0', 
   },
   catContainer: {
     position: 'absolute',
@@ -92,13 +91,13 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   buttonGreen: {
-    backgroundColor: '#4CAF50', // Green button color
+    backgroundColor: '#4CAF50', 
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 8,
   },
   buttonBlue: {
-    backgroundColor: '#2196F3', // Blue button color
+    backgroundColor: '#2196F3', 
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 8,
