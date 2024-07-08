@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "my-scratch-edior",
-    "slug": "my-scratch-edior",
+    "name": "Scratch-editor",
+    "slug": "Scratch-editor",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
