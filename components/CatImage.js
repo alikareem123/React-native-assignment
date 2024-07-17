@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, StyleSheet, Text } from 'react-native';
-import Svg, { Image } from 'react-native-svg';
+import React from "react";
+import { View, StyleSheet, Text } from "react-native";
+import Svg, { Image } from "react-native-svg";
 
 const CatImage = ({ position, rotation, size, message, panHandlers }) => (
   <View
@@ -18,9 +18,15 @@ const CatImage = ({ position, rotation, size, message, panHandlers }) => (
     {...panHandlers}
   >
     <Svg height={size} width={size}>
-      <Image href={require('../assets/cat.png')} x="0" y="0" width="100%" height="100%" />
+      <Image
+        href={require("../assets/cat.png")}
+        x="0"
+        y="0"
+        width="100%"
+        height="100%"
+      />
     </Svg>
-    {message !== '' && (
+    {message !== "" && (
       <View style={styles.messageContainer}>
         <Text style={styles.messageText}>{message}</Text>
       </View>
@@ -31,19 +37,23 @@ const CatImage = ({ position, rotation, size, message, panHandlers }) => (
 const styles = StyleSheet.create({
   catContainer: {
     position: 'absolute',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
+    width: 200,
+    marginHorizontal: 50,
+    padding: 10
   },
   messageContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: -30,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 5,
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: '#000',
+    borderColor: "#000",
   },
   messageText: {
-    color: '#000',
+    color: "#000",
     fontSize: 14,
   },
 });

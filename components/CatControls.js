@@ -32,26 +32,30 @@ const CatControls = ({ moveLeft, moveRight, rotate, getPosition, sayHello, think
 
 const styles = StyleSheet.create({
   buttonsContainer: {
-    position: 'absolute',
-    bottom: 50,
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    width: '100%',
-    flexWrap: 'wrap',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    flex: 1
   },
   buttonGreen: {
     backgroundColor: '#4CAF50',
-    paddingVertical: 15,
-    paddingHorizontal: 30,
+    
+    paddingHorizontal: 20,
     borderRadius: 8,
-    margin: 5,
+    marginTop: 10,
+    width: 120,
+    justifyContent: 'center',
+    flex: 1
   },
   buttonBlue: {
     backgroundColor: '#2196F3',
-    paddingVertical: 15,
-    paddingHorizontal: 30,
+    marginLeft: 20,
+    marginTop: 10,
+    width: 100,
+    justifyContent: 'center',
     borderRadius: 8,
     margin: 5,
+    flex: 1
   },
   buttonText: {
     color: 'white',
