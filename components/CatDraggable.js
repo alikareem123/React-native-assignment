@@ -1,97 +1,200 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { View, StyleSheet, PanResponder, Alert, Button } from "react-native";
 import CatImage from "./CatImage";
 import CatControls from "./CatControls";
 
 const CatDraggable = () => {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [rotation, setRotation] = useState(0);
-  const [message, setMessage] = useState("");
-  const [size, setSize] = useState(100);
-  const [actionGroup, setActionGroup] = useState([]);
-  const positionRef = useRef(position);
+  const [cats, setCats] = useState([
+    {
+      id: 1,
+      position: { x: 0, y: 0 },
+      rotation: 0,
+      message: "",
+      size: 100,
+      actions: [],
+    },
+  ]);
+  const [currentCatId, setCurrentCatId] = useState(1);
+  const positionRefs = useRef({ 1: { x: 0, y: 0 } });
 
-  const panResponder = useRef(
-    PanResponder.create({
+  useEffect(() => {
+    const currentCat = cats.find((cat) => cat.id === currentCatId);
+    if (currentCat) {
+      positionRefs.current[currentCatId] = currentCat.position;
+    }
+  }, [currentCatId, cats]);
+
+  const createPanResponder = (catId) => {
+    return PanResponder.create({
       onStartShouldSetPanResponder: () => true,
+      onPanResponderGrant: (event, gestureState) => {
+        setCurrentCatId(catId);
+      },
       onPanResponderMove: (event, gestureState) => {
-        const newX = positionRef.current.x + gestureState.dx;
-        const newY = positionRef.current.y + gestureState.dy;
-        setPosition({ x: newX, y: newY });
+        const newX =
+          positionRefs.current[catId].x +
+          (gestureState.moveX - gestureState.x0) * sensitivity;
+        const newY =
+          positionRefs.current[catId].y +
+          (gestureState.moveY - gestureState.y0) * sensitivity;
+        updateCatPosition(catId, { x: newX, y: newY });
       },
       onPanResponderRelease: (event, gestureState) => {
-        positionRef.current = {
-          x: position.x + gestureState.dx,
-          y: position.y + gestureState.dy,
+        positionRefs.current[catId] = {
+          x:
+            positionRefs.current[catId].x +
+            (gestureState.moveX - gestureState.x0) * sensitivity,
+          y:
+            positionRefs.current[catId].y +
+            (gestureState.moveY - gestureState.y0) * sensitivity,
         };
-        setPosition(positionRef.current);
+        updateCatPosition(catId, positionRefs.current[catId]);
       },
-    })
-  ).current;
-
-  const addActionToGroup = (action) => {
-    setActionGroup([...actionGroup, action]);
-  };
-  function timeout(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-  const executeActionsSequentially = async () => {
-    for (const action of actionGroup) {
-      await timeout(800);
-      await action();
-    }
-    setActionGroup([]);
+    });
   };
 
-  const moveLeft = () => setPosition({ ...position, x: position.x - 10 });
-  const moveRight = () => setPosition({ ...position, x: position.x + 10 });
-  const rotate = () => setRotation(rotation + 10);
-  const getPosition = () => {
-    Alert.alert(
-      "Position",
-      `X: ${position.x.toFixed(2)}, Y: ${position.y.toFixed(2)}`
+  const sensitivity = 0.01; // Adjust this value to make the drag less sensitive
+
+  const addCat = () => {
+    const newCat = {
+      id: cats.length + 1,
+      position: { x: 0, y: 0 },
+      rotation: 0,
+      message: "",
+      size: 100,
+      actions: [],
+    };
+    setCats([...cats, newCat]);
+    positionRefs.current[newCat.id] = { x: 0, y: 0 };
+    setCurrentCatId(newCat.id);
+  };
+
+  const updateCatPosition = (id, position) => {
+    setCats((prevCats) =>
+      prevCats.map((cat) => (cat.id === id ? { ...cat, position } : cat))
     );
   };
 
-  const sayHello = () => {
-    setMessage("Hello");
-    setTimeout(() => setMessage(""), 2000);
+  const updateCatState = (id, updates) => {
+    setCats((prevCats) =>
+      prevCats.map((cat) => (cat.id === id ? { ...cat, ...updates } : cat))
+    );
   };
 
-  const thinkHmm = () => {
-    setMessage("HMM");
-    setTimeout(() => setMessage(""), 2000);
+  const addActionToCurrentCat = (action) => {
+    setCats((prevCats) =>
+      prevCats.map((cat) =>
+        cat.id === currentCatId
+          ? { ...cat, actions: [...cat.actions, action] }
+          : cat
+      )
+    );
   };
 
-  const increaseSize = () => setSize(size + 10);
-  const resetSize = () => setSize(100);
+  const moveLeft = () =>
+    addActionToCurrentCat(() =>
+      updateCatPosition(currentCatId, {
+        ...positionRefs.current[currentCatId],
+        x: positionRefs.current[currentCatId].x - 10,
+      })
+    );
+  const moveRight = () =>
+    addActionToCurrentCat(() =>
+      updateCatPosition(currentCatId, {
+        ...positionRefs.current[currentCatId],
+        x: positionRefs.current[currentCatId].x + 10,
+      })
+    );
+  const rotate = () =>
+    addActionToCurrentCat(() =>
+      updateCatState(currentCatId, {
+        rotation:
+          (cats.find((cat) => cat.id === currentCatId).rotation + 10) % 360,
+      })
+    );
+  const getPosition = () =>
+    addActionToCurrentCat(() => {
+      const currentCat = cats.find((cat) => cat.id === currentCatId);
+      Alert.alert(
+        "Position",
+        `X: ${currentCat.position.x.toFixed(
+          2
+        )}, Y: ${currentCat.position.y.toFixed(2)}`
+      );
+    });
+
+  const sayHello = () =>
+    addActionToCurrentCat(() => {
+      updateCatState(currentCatId, { message: "Hello" });
+      setTimeout(() => updateCatState(currentCatId, { message: "" }), 2000);
+    });
+
+  const thinkHmm = () =>
+    addActionToCurrentCat(() => {
+      updateCatState(currentCatId, { message: "HMM" });
+      setTimeout(() => updateCatState(currentCatId, { message: "" }), 2000);
+    });
+
+  const increaseSize = () =>
+    addActionToCurrentCat(() =>
+      updateCatState(currentCatId, {
+        size: cats.find((cat) => cat.id === currentCatId).size + 10,
+      })
+    );
+  const resetSize = () =>
+    addActionToCurrentCat(() => updateCatState(currentCatId, { size: 100 }));
+
+  const executeActionsSequentially = async () => {
+    const actions = cats.find((cat) => cat.id === currentCatId).actions;
+    for (const action of actions) {
+      await timeout(800);
+      await action();
+    }
+    setCats((prevCats) =>
+      prevCats.map((cat) =>
+        cat.id === currentCatId ? { ...cat, actions: [] } : cat
+      )
+    );
+  };
+
+  const timeout = (ms) => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  };
+
+  const handleCatPress = (cat) => {
+    setCurrentCatId(cat.id);
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.background} />
       <View style={styles.controlsContainer}>
         <CatControls
-          addActionToGroup={addActionToGroup}
-          moveLeft={() => addActionToGroup(moveLeft)}
-          moveRight={() => addActionToGroup(moveRight)}
-          rotate={() => addActionToGroup(rotate)}
-          getPosition={() => addActionToGroup(getPosition)}
-          sayHello={() => addActionToGroup(sayHello)}
-          thinkHmm={() => addActionToGroup(thinkHmm)}
-          increaseSize={() => addActionToGroup(increaseSize)}
-          resetSize={() => addActionToGroup(resetSize)}
+          moveLeft={moveLeft}
+          moveRight={moveRight}
+          rotate={rotate}
+          getPosition={getPosition}
+          sayHello={sayHello}
+          thinkHmm={thinkHmm}
+          increaseSize={increaseSize}
+          resetSize={resetSize}
         />
+        <Button title="Add Cat" onPress={addCat} />
         <View style={styles.catPlayer}>
           <Button title="Play Actions" onPress={executeActionsSequentially} />
         </View>
       </View>
-      <CatImage
-        position={position}
-        rotation={rotation}
-        size={size}
-        message={message}
-        panHandlers={panResponder.panHandlers}
-      />
+      {cats.map((cat) => (
+        <CatImage
+          key={cat.id}
+          position={cat.position}
+          rotation={cat.rotation}
+          size={cat.size}
+          message={cat.message}
+          panHandlers={createPanResponder(cat.id).panHandlers}
+          onPress={() => handleCatPress(cat)}
+        />
+      ))}
     </View>
   );
 };
