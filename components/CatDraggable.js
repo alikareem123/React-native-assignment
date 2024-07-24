@@ -27,7 +27,7 @@ const CatDraggable = () => {
   const createPanResponder = (catId) => {
     return PanResponder.create({
       onStartShouldSetPanResponder: () => true,
-      onPanResponderGrant: (event, gestureState) => {
+      onPanResponderGrant: () => {
         setCurrentCatId(catId);
       },
       onPanResponderMove: (event, gestureState) => {
@@ -144,15 +144,15 @@ const CatDraggable = () => {
   const resetSize = () =>
     addActionToCurrentCat(() => updateCatState(currentCatId, { size: 100 }));
 
-  const executeActionsSequentially = async () => {
-    const actions = cats.find((cat) => cat.id === currentCatId).actions;
+  const executeActionsSequentially = async (catId) => {
+    const actions = cats.find((cat) => cat.id === catId).actions;
     for (const action of actions) {
       await timeout(800);
       await action();
     }
     setCats((prevCats) =>
       prevCats.map((cat) =>
-        cat.id === currentCatId ? { ...cat, actions: [] } : cat
+        cat.id === catId ? { ...cat, actions: [] } : cat
       )
     );
   };
@@ -163,6 +163,10 @@ const CatDraggable = () => {
 
   const handleCatPress = (cat) => {
     setCurrentCatId(cat.id);
+  };
+
+  const handlePlayAll = () => {
+    cats.forEach((cat) => executeActionsSequentially(cat.id));
   };
 
   return (
@@ -181,7 +185,7 @@ const CatDraggable = () => {
         />
         <Button title="Add Cat" onPress={addCat} />
         <View style={styles.catPlayer}>
-          <Button title="Play Actions" onPress={executeActionsSequentially} />
+          <Button title="Play All Actions" onPress={handlePlayAll} />
         </View>
       </View>
       {cats.map((cat) => (
